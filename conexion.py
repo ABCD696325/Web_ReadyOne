@@ -1,17 +1,12 @@
-import os
-from dotenv import load_dotenv
+import streamlit as st
 from supabase import create_client
 
-
 class ConexionDB:
-    def __init__(self):
-        load_dotenv()
-
     def conectar(self):
-        url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_API_KEY")
-
-        if not url or not key:
-            raise Exception("SUPABASE_URL o SUPABASE_API_KEY no configuradas")
+        try:
+            url = st.secrets["SUPABASE_URL"]
+            key = st.secrets["SUPABASE_KEY"]
+        except Exception:
+            raise Exception("SUPABASE_URL o SUPABASE_KEY no configuradas en Streamlit Secrets")
 
         return create_client(url, key)
