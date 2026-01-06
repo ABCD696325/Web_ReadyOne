@@ -6,51 +6,78 @@ class PReservas:
     def __init__(self):
         self.negocio = NReservas()
         self.clientes = NClientes()
+        self._init_state()
         self.interfaz()
+
+    def _init_state(self):
+        if "reserva_sel" not in st.session_state:
+            st.session_state.reserva_sel = None
 
     def interfaz(self):
         st.title("📅 Reservas - READY ONE")
 
         reservas = self.negocio.listar()
         st.subheader("📋 Reservas registradas")
-        st.dataframe(reservas, use_container_width=True)
+
+        seleccion = st.dataframe(
+            reservas,
+            use_container_width=True,
+            selection_mode="single-row",
+            on_select="rerun"
+        )
+
+        if seleccion.selection.rows:
+            st.session_state.reserva_sel = reservas[
+                seleccion.selection.rows[0]
+            ]
 
         st.divider()
         self.formulario()
 
     def formulario(self):
-        st.subheader("📝 Registrar Reserva")
-
         clientes = {
-            f"{c['nombres']} {c['apellidos']}": c["id_cliente"]
+            f"{c['nombre']}": c["id_cliente"]
             for c in self.clientes.listar()
         }
 
-        cliente = st.selectbox("Cliente", list(clientes.keys()))
+        st.subheader("📝 Registrar Reserva")
+
+        cliente = st.selectbox("Cliente", clientes.keys())
 
         precio = st.number_input(
             "Precio (S/.)",
             min_value=1.0,
-            step=10.0,
-            help="Ingrese el monto total de la reserva"
+            step=10.0
         )
 
-        estado = st.text_input(
+        estado = st.selectbox(
             "Estado",
-            help="Valores permitidos: DISPONIBLE, EN_PROCESO, CANCELADO, FINALIZADO"
+            ["SOLICITADO", "EN_PROCESO", "FINALIZADO", "CANCELADO"],
+            help="Estado actual de la reserva"
         )
 
         observaciones = st.text_area("Observaciones")
 
-        if st.button("💾 Guardar"):
-            try:
-                self.negocio.registrar(
-                    clientes[cliente],
-                    precio,
-                    estado.upper(),
-                    observaciones
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("💾 Guardar"):
+                try:
+                    self.negocio.registrar(
+                        clientes[cliente],
+                        precio,
+                        estado,
+                        observaciones
+                    )
+                    st.success("Reserva registrada correctamente")
+                    st.rerun()
+                except Exception as e:
+                    st.error(str(e))
+
+        with col2:
+            if st.button("🗑️ Eliminar") and st.session_state.reserva_sel:
+                self.negocio.eliminar(
+                    st.session_state.reserva_sel["id_reserva"]
                 )
-                st.success("Reserva registrada correctamente")
+                st.warning("Reserva eliminada")
                 st.rerun()
-            except Exception as e:
-                st.error(str(e))
