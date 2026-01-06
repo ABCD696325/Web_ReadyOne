@@ -11,11 +11,6 @@ class PClientes:
         if "cliente_sel" not in st.session_state:
             st.session_state.cliente_sel = None
 
-    def _solo_numeros(self, valor, max_len):
-        if valor is None:
-            return ""
-        return "".join(filter(str.isdigit, valor))[:max_len]
-
     def interfaz(self):
         st.title("👥 Gestión de Clientes - READY ONE")
 
@@ -57,37 +52,46 @@ class PClientes:
                 value="" if not cliente else cliente.get("apellidos", "")
             )
 
-            dni = st.text_input(
+            dni = st.number_input(
                 "DNI (8 dígitos)",
-                value="" if not cliente else cliente.get("dni", "")
+                min_value=0,
+                max_value=99999999,
+                step=1,
+                value=int(cliente["dni"]) if cliente and cliente.get("dni") else 0
             )
-            dni = self._solo_numeros(dni, 8)
+            dni = str(dni).zfill(8)
 
             razon_social = ruc = None
+
         else:
             razon_social = st.text_input(
                 "Razón Social",
                 value="" if not cliente else cliente.get("razon_social", "")
             )
 
-            ruc = st.text_input(
+            ruc = st.number_input(
                 "RUC (11 dígitos)",
-                value="" if not cliente else cliente.get("ruc", "")
+                min_value=0,
+                max_value=99999999999,
+                step=1,
+                value=int(cliente["ruc"]) if cliente and cliente.get("ruc") else 0
             )
-            ruc = self._solo_numeros(ruc, 11)
+            ruc = str(ruc).zfill(11)
 
             nombres = apellidos = dni = None
 
-        telefono = st.text_input(
+        telefono = st.number_input(
             "Teléfono (9 dígitos)",
-            value="" if not cliente else cliente.get("telefono", "")
+            min_value=0,
+            max_value=999999999,
+            step=1,
+            value=int(cliente["telefono"]) if cliente and cliente.get("telefono") else 0
         )
-        telefono = self._solo_numeros(telefono, 9)
+        telefono = str(telefono).zfill(9)
 
         correo = st.text_input(
             "Correo electrónico",
-            value="" if not cliente else cliente.get("correo", ""),
-            help="Ejemplo: usuario@gmail.com"
+            value="" if not cliente else cliente.get("correo", "")
         )
 
         col1, col2, col3 = st.columns(3)
