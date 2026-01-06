@@ -11,6 +11,14 @@ class DReservas:
     def insertar(self, data):
         return self.db.table(self.tabla).insert(data).execute()
 
+    def actualizar(self, id_reserva, data):
+        return (
+            self.db.table(self.tabla)
+            .update(data)
+            .eq("id_reserva", id_reserva)
+            .execute()
+        )
+
     def eliminar(self, id_reserva):
         return (
             self.db.table(self.tabla)

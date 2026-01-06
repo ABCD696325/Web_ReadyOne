@@ -7,17 +7,36 @@ class NReservas:
     def listar(self):
         return self.datos.listar()
 
-    def registrar(self, id_cliente, estado, precio):
+    def registrar(self, id_cliente, precio, estado, observaciones):
         if precio <= 0:
             raise ValueError("El precio debe ser mayor a 0")
 
+        if estado not in [
+            "SOLICITADO",
+            "DISPONIBLE",
+            "EN_PROCESO",
+            "CANCELADO",
+            "FINALIZADO"
+        ]:
+            raise ValueError("Estado inválido")
+
         data = {
             "id_cliente": id_cliente,
+            "precio": float(precio),
             "estado": estado,
-            "precio": float(precio)
+            "observaciones": observaciones
         }
 
         return self.datos.insertar(data)
+
+    def actualizar(self, id_reserva, precio, estado, observaciones):
+        data = {
+            "precio": float(precio),
+            "estado": estado,
+            "observaciones": observaciones
+        }
+
+        return self.datos.actualizar(id_reserva, data)
 
     def eliminar(self, id_reserva):
         return self.datos.eliminar(id_reserva)
