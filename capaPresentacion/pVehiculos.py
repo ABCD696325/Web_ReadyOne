@@ -24,8 +24,9 @@ class PVehiculos:
         )
 
         if seleccion.selection.rows:
-            idx = seleccion.selection.rows[0]
-            st.session_state.vehiculo_sel = vehiculos[idx]
+            st.session_state.vehiculo_sel = vehiculos[
+                seleccion.selection.rows[0]
+            ]
 
         st.divider()
         self.formulario()
@@ -33,76 +34,63 @@ class PVehiculos:
     def formulario(self):
         vehiculo = st.session_state.vehiculo_sel
 
-        st.subheader("📝 Registrar / Editar Vehículo")
-
         placa = st.text_input(
             "Placa",
             value=vehiculo["placa"] if vehiculo else "",
-            help="Ejemplo: ABC-123 (mínimo 6 caracteres)"
+            help="Mínimo 6 caracteres"
         )
 
         marca = st.text_input(
             "Marca",
-            value=vehiculo["marca"] if vehiculo else "",
-            help="Ejemplo: Toyota, Hyundai"
+            value=vehiculo["marca"] if vehiculo else ""
         )
 
         modelo = st.text_input(
             "Modelo",
-            value=vehiculo["modelo"] if vehiculo else "",
-            help="Ejemplo: Hiace, H1"
+            value=vehiculo["modelo"] if vehiculo else ""
         )
 
         capacidad = st.number_input(
-            "Capacidad de pasajeros",
+            "Capacidad",
             min_value=4,
             step=1,
-            value=vehiculo["capacidad"] if vehiculo else 4,
-            help="Mínimo permitido: 4 pasajeros"
+            value=vehiculo["capacidad"] if vehiculo else 4
         )
 
         estado = st.selectbox(
-            "Estado del vehículo",
+            "Estado",
             ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"],
             index=0 if not vehiculo else
-            ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"].index(vehiculo["estado"]),
-            help="Seleccione el estado actual del vehículo"
+            ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"].index(
+                vehiculo["estado"]
+            )
         )
 
-        col1, col2 = st.columns(2)
+        if st.button("💾 Guardar"):
+            try:
+                if vehiculo:
+                    self.logica.actualizar(
+                        vehiculo["id_vehiculo"],
+                        placa,
+                        marca,
+                        modelo,
+                        capacidad,
+                        estado
+                    )
+                    st.success("Vehículo actualizado")
+                else:
+                    self.logica.registrar(
+                        placa,
+                        marca,
+                        modelo,
+                        capacidad,
+                        estado
+                    )
+                    st.success("Vehículo registrado")
 
-        with col1:
-            if st.button("💾 Guardar"):
-                try:
-                    if vehiculo:
-                        self.logica.actualizar(
-                            vehiculo["id_vehiculo"],
-                            placa,
-                            marca,
-                            modelo,
-                            capacidad,
-                            estado
-                        )
-                        st.success("Vehículo actualizado correctamente")
-                    else:
-                        self.logica.registrar(
-                            placa,
-                            marca,
-                            modelo,
-                            capacidad,
-                            estado
-                        )
-                        st.success("Vehículo registrado correctamente")
-
-                    self._limpiar()
-                except Exception as e:
-                    st.error(str(e))
-
-        with col2:
-            if st.button("🗑️ Eliminar") and vehiculo:
-                self.logica.eliminar(vehiculo["id_vehiculo"])
-                st.warning("Vehículo eliminado")
                 self._limpiar()
+            except Exception as e:
+                st.error(str(e))
 
     def _limpiar(self):
         st.session_state.vehiculo_sel = None

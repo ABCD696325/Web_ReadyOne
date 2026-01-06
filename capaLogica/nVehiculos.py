@@ -4,15 +4,11 @@ class NVehiculos:
     def __init__(self):
         self.datos = DVehiculos()
 
-    # ========= VALIDACIONES =========
-
     def _validar_placa(self, placa):
         return placa and len(placa) >= 6
 
     def _validar_capacidad(self, capacidad):
         return capacidad >= 4
-
-    # ========= CRUD =========
 
     def listar(self):
         return self.datos.listar()
@@ -24,7 +20,7 @@ class NVehiculos:
         if not self._validar_capacidad(capacidad):
             raise ValueError("La capacidad mínima es 4 pasajeros")
 
-        if not marca.strip() or not modelo.strip():
+        if not marca or not modelo:
             raise ValueError("Marca y modelo son obligatorios")
 
         data = {
@@ -38,9 +34,6 @@ class NVehiculos:
         return self.datos.insertar(data)
 
     def actualizar(self, id_vehiculo, placa, marca, modelo, capacidad, estado):
-        if not self._validar_capacidad(capacidad):
-            raise ValueError("Capacidad mínima 4 pasajeros")
-
         data = {
             "placa": placa.upper(),
             "marca": marca,
