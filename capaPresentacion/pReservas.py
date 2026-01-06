@@ -35,8 +35,14 @@ class PReservas:
 
             estado = st.selectbox(
                 "Estado",
-                ["DISPONIBLE", "EN PROCESO", "CANCELADO", "FINALIZADO"]
+                [
+                    "SOLICITADO",
+                    "EN_PROCESO",
+                    "CANCELADO",
+                    "FINALIZADO"
+                ]
             )
+
 
             observaciones = st.text_area("Observaciones")
 
