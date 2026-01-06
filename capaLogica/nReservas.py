@@ -11,14 +11,12 @@ class NReservas:
     def registrar(
         self,
         id_cliente,
-        metodo_pago,
         monto,
         estado,
         observaciones
     ):
         data = {
             "id_cliente": id_cliente,
-            "metodo_pago": metodo_pago,
             "monto_total": float(monto),
             "estado": estado,
             "observaciones": observaciones

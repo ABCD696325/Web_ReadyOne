@@ -13,6 +13,7 @@ class PReservas:
         st.title("📅 Gestión de Reservas - READY ONE")
 
         reservas = self.logica.listar()
+        st.subheader("📋 Reservas registradas")
         st.dataframe(reservas, use_container_width=True)
 
         st.divider()
@@ -27,11 +28,6 @@ class PReservas:
         st.subheader("📝 Registrar Reserva")
 
         cliente = st.selectbox("Cliente", clientes.keys())
-
-        metodo_pago = st.selectbox(
-            "Método de pago",
-            ["EFECTIVO", "TRANSFERENCIA", "YAPE", "PLIN"]
-        )
 
         monto = st.number_input(
             "Monto total (S/.)",
@@ -51,7 +47,6 @@ class PReservas:
             try:
                 self.logica.registrar(
                     clientes[cliente],
-                    metodo_pago,
                     monto,
                     estado,
                     observaciones
