@@ -4,7 +4,6 @@ from capaLogica.nClientes import NClientes
 from capaLogica.nServicios import NServicios
 from capaLogica.nVehiculos import NVehiculos
 from capaLogica.nConductores import NConductores
-from datetime import date
 
 
 class PReservas:
@@ -25,25 +24,12 @@ class PReservas:
         st.title("📅 Gestión de Reservas - READY ONE")
 
         reservas = self.logica.listar()
-        st.subheader("📋 Reservas registradas")
-
-        seleccion = st.dataframe(
-            reservas,
-            use_container_width=True,
-            selection_mode="single-row",
-            on_select="rerun"
-        )
-
-        if seleccion.selection.rows:
-            idx = seleccion.selection.rows[0]
-            st.session_state.reserva_sel = reservas[idx]
+        st.dataframe(reservas, use_container_width=True)
 
         st.divider()
         self.formulario()
 
     def formulario(self):
-        reserva = st.session_state.reserva_sel
-
         clientes = {
             f"{c['nombres']} {c['apellidos']}": c["id_cliente"]
             for c in self.clientes.listar()
@@ -55,7 +41,7 @@ class PReservas:
         }
 
         vehiculos = {
-            f"{v['placa']} | {v['capacidad']} pax | {v['estado']}": v["id_vehiculo"]
+            f"{v['placa']} | {v['capacidad']} pax": v["id_vehiculo"]
             for v in self.vehiculos.listar()
         }
 
@@ -64,73 +50,40 @@ class PReservas:
             for c in self.conductores.listar()
         }
 
-        st.subheader("📝 Registrar / Editar Reserva")
+        st.subheader("📝 Registrar Reserva")
 
-        cliente = st.selectbox("Cliente", list(clientes.keys()))
-        servicio = st.selectbox("Servicio", list(servicios.keys()))
-        vehiculo = st.selectbox("Vehículo", list(vehiculos.keys()))
-        conductor = st.selectbox("Conductor", list(conductores.keys()))
-
-        fecha_reserva = st.date_input(
-            "Fecha de la reserva",
-            min_value=date.today()
-        )
+        cliente = st.selectbox("Cliente", clientes.keys())
+        servicio = st.selectbox("Servicio", servicios.keys())
+        vehiculo = st.selectbox("Vehículo", vehiculos.keys())
+        conductor = st.selectbox("Conductor", conductores.keys())
 
         metodo_pago = st.selectbox(
             "Método de pago",
             ["EFECTIVO", "TRANSFERENCIA", "YAPE", "PLIN"]
         )
 
-        monto = st.number_input(
-            "Monto total (S/.)",
-            min_value=0.0,
-            step=10.0
-        )
+        monto = st.number_input("Monto total", min_value=0.0, step=10.0)
 
         estado = st.selectbox(
-            "Estado de la reserva",
-            [
-                "PENDIENTE",
-                "CONFIRMADA",
-                "EN_PROCESO",
-                "FINALIZADA",
-                "CANCELADA"
-            ]
+            "Estado",
+            ["PENDIENTE", "CONFIRMADA", "EN_PROCESO", "FINALIZADA", "CANCELADA"]
         )
 
         observaciones = st.text_area("Observaciones")
 
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            if st.button("💾 Guardar"):
-                try:
-                    self.logica.registrar(
-                        clientes[cliente],
-                        servicios[servicio],
-                        vehiculos[vehiculo],
-                        conductores[conductor],
-                        fecha_reserva,
-                        metodo_pago,
-                        monto,
-                        estado,
-                        observaciones
-                    )
-                    st.success("Reserva registrada correctamente")
-                    self._limpiar()
-                except Exception as e:
-                    st.error(str(e))
-
-        with col2:
-            if st.button("🗑️ Eliminar") and reserva:
-                self.logica.eliminar(reserva["id_reserva"])
-                st.warning("Reserva eliminada")
-                self._limpiar()
-
-        with col3:
-            if st.button("🧹 Limpiar"):
-                self._limpiar()
-
-    def _limpiar(self):
-        st.session_state.reserva_sel = None
-        st.rerun()
+        if st.button("💾 Guardar Reserva"):
+            try:
+                self.logica.registrar(
+                    clientes[cliente],
+                    servicios[servicio],
+                    vehiculos[vehiculo],
+                    conductores[conductor],
+                    metodo_pago,
+                    monto,
+                    estado,
+                    observaciones
+                )
+                st.success("Reserva registrada correctamente")
+                st.rerun()
+            except Exception as e:
+                st.error(str(e))

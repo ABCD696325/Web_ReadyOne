@@ -1,5 +1,4 @@
 from capaDatos.dReservas import DReservas
-from datetime import date
 
 
 class NReservas:
@@ -7,9 +6,6 @@ class NReservas:
         self.datos = DReservas()
 
     # ========= VALIDACIONES =========
-
-    def _validar_fecha(self, fecha):
-        return fecha >= date.today()
 
     def _validar_estado(self, estado):
         return estado in [
@@ -31,15 +27,11 @@ class NReservas:
         id_servicio,
         id_vehiculo,
         id_conductor,
-        fecha,
         metodo_pago,
         monto,
         estado,
         observaciones
     ):
-        if not self._validar_fecha(fecha):
-            raise ValueError("La fecha no puede ser anterior a hoy")
-
         if not self._validar_estado(estado):
             raise ValueError("Estado inválido")
 
@@ -48,7 +40,6 @@ class NReservas:
             "id_servicio": id_servicio,
             "id_vehiculo": id_vehiculo,
             "id_conductor": id_conductor,
-            "fecha": fecha.isoformat(),   # ✅ CAMBIO CLAVE
             "metodo_pago": metodo_pago,
             "monto_total": float(monto),
             "estado": estado,
@@ -56,9 +47,6 @@ class NReservas:
         }
 
         return self.datos.insertar(data)
-
-    def actualizar(self, id_reserva, data):
-        return self.datos.actualizar(id_reserva, data)
 
     def eliminar(self, id_reserva):
         return self.datos.eliminar(id_reserva)
