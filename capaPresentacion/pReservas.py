@@ -1,14 +1,12 @@
 import streamlit as st
 from capaLogica.nReservas import NReservas
 from capaLogica.nClientes import NClientes
-from capaLogica.nVehiculos import NVehiculos
 
 
 class PReservas:
     def __init__(self):
         self.logica = NReservas()
         self.clientes = NClientes()
-        self.vehiculos = NVehiculos()
         self.interfaz()
 
     def interfaz(self):
@@ -26,22 +24,20 @@ class PReservas:
             for c in self.clientes.listar()
         }
 
-        vehiculos = {
-            f"{v['placa']} | {v['capacidad']} pax": v["id_vehiculo"]
-            for v in self.vehiculos.listar()
-        }
-
         st.subheader("📝 Registrar Reserva")
 
         cliente = st.selectbox("Cliente", clientes.keys())
-        vehiculo = st.selectbox("Vehículo", vehiculos.keys())
 
         metodo_pago = st.selectbox(
             "Método de pago",
             ["EFECTIVO", "TRANSFERENCIA", "YAPE", "PLIN"]
         )
 
-        monto = st.number_input("Monto total", min_value=0.0, step=10.0)
+        monto = st.number_input(
+            "Monto total (S/.)",
+            min_value=0.0,
+            step=10.0
+        )
 
         estado = st.text_input(
             "Estado",
@@ -55,7 +51,6 @@ class PReservas:
             try:
                 self.logica.registrar(
                     clientes[cliente],
-                    vehiculos[vehiculo],
                     metodo_pago,
                     monto,
                     estado,
