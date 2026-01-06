@@ -3,7 +3,6 @@ from capaLogica.nReservas import NReservas
 from capaLogica.nClientes import NClientes
 from capaLogica.nServicios import NServicios
 from capaLogica.nVehiculos import NVehiculos
-from capaLogica.nConductores import NConductores
 
 
 class PReservas:
@@ -12,13 +11,7 @@ class PReservas:
         self.clientes = NClientes()
         self.servicios = NServicios()
         self.vehiculos = NVehiculos()
-        self.conductores = NConductores()
-        self._init_state()
         self.interfaz()
-
-    def _init_state(self):
-        if "reserva_sel" not in st.session_state:
-            st.session_state.reserva_sel = None
 
     def interfaz(self):
         st.title("📅 Gestión de Reservas - READY ONE")
@@ -45,17 +38,11 @@ class PReservas:
             for v in self.vehiculos.listar()
         }
 
-        conductores = {
-            f"{c['nombres']} {c['apellidos']}": c["id_conductor"]
-            for c in self.conductores.listar()
-        }
-
         st.subheader("📝 Registrar Reserva")
 
         cliente = st.selectbox("Cliente", clientes.keys())
         servicio = st.selectbox("Servicio", servicios.keys())
         vehiculo = st.selectbox("Vehículo", vehiculos.keys())
-        conductor = st.selectbox("Conductor", conductores.keys())
 
         metodo_pago = st.selectbox(
             "Método de pago",
@@ -77,7 +64,6 @@ class PReservas:
                     clientes[cliente],
                     servicios[servicio],
                     vehiculos[vehiculo],
-                    conductores[conductor],
                     metodo_pago,
                     monto,
                     estado,

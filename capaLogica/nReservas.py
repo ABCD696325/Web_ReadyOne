@@ -5,8 +5,6 @@ class NReservas:
     def __init__(self):
         self.datos = DReservas()
 
-    # ========= VALIDACIONES =========
-
     def _validar_estado(self, estado):
         return estado in [
             "PENDIENTE",
@@ -16,8 +14,6 @@ class NReservas:
             "CANCELADA"
         ]
 
-    # ========= CRUD =========
-
     def listar(self):
         return self.datos.listar()
 
@@ -26,7 +22,6 @@ class NReservas:
         id_cliente,
         id_servicio,
         id_vehiculo,
-        id_conductor,
         metodo_pago,
         monto,
         estado,
@@ -39,7 +34,6 @@ class NReservas:
             "id_cliente": id_cliente,
             "id_servicio": id_servicio,
             "id_vehiculo": id_vehiculo,
-            "id_conductor": id_conductor,
             "metodo_pago": metodo_pago,
             "monto_total": float(monto),
             "estado": estado,
