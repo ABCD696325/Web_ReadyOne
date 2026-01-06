@@ -31,12 +31,13 @@ class PReservas:
         precio = st.number_input(
             "Precio (S/.)",
             min_value=1.0,
-            step=10.0
+            step=10.0,
+            help="Ingrese el monto total de la reserva"
         )
 
-        estado = st.selectbox(
+        estado = st.text_input(
             "Estado",
-            ["DISPONIBLE", "EN_PROCESO", "CANCELADO", "FINALIZADO"]
+            help="Valores permitidos: DISPONIBLE, EN_PROCESO, CANCELADO, FINALIZADO"
         )
 
         observaciones = st.text_area("Observaciones")
@@ -46,7 +47,7 @@ class PReservas:
                 self.negocio.registrar(
                     clientes[cliente],
                     precio,
-                    estado,
+                    estado.upper(),
                     observaciones
                 )
                 st.success("Reserva registrada correctamente")
