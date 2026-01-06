@@ -8,8 +8,13 @@ class PClientes:
         self.interfaz()
 
     def _init_state(self):
-        if "cliente_sel" not in st.session_state:
-            st.session_state.cliente_sel = None
+        for k in ["cliente_sel", "dni", "ruc", "telefono"]:
+            if k not in st.session_state:
+                st.session_state[k] = ""
+
+    def _solo_numeros(self, valor, max_len):
+        valor = "".join(c for c in valor if c.isdigit())
+        return valor[:max_len]
 
     def interfaz(self):
         st.title("👥 Gestión de Clientes - READY ONE")
@@ -24,15 +29,15 @@ class PClientes:
         )
 
         if seleccion.selection.rows:
-            idx = seleccion.selection.rows[0]
-            st.session_state.cliente_sel = clientes[idx]
+            st.session_state.cliente_sel = clientes[
+                seleccion.selection.rows[0]
+            ]
 
         st.divider()
         self.formulario()
 
     def formulario(self):
         st.subheader("📝 Registrar / Editar Cliente")
-
         cliente = st.session_state.cliente_sel
 
         tipo = st.selectbox(
@@ -52,14 +57,15 @@ class PClientes:
                 value="" if not cliente else cliente.get("apellidos", "")
             )
 
-            dni = st.number_input(
-                "DNI (8 dígitos)",
-                min_value=0,
-                max_value=99999999,
-                step=1,
-                value=int(cliente["dni"]) if cliente and cliente.get("dni") else 0
+            st.session_state.dni = st.text_input(
+                "DNI",
+                value=cliente.get("dni", "") if cliente else "",
+                key="dni_input"
             )
-            dni = str(dni).zfill(8)
+            st.session_state.dni = self._solo_numeros(
+                st.session_state.dni, 8
+            )
+            st.caption(f"{len(st.session_state.dni)}/8 dígitos")
 
             razon_social = ruc = None
 
@@ -69,25 +75,27 @@ class PClientes:
                 value="" if not cliente else cliente.get("razon_social", "")
             )
 
-            ruc = st.number_input(
-                "RUC (11 dígitos)",
-                min_value=0,
-                max_value=99999999999,
-                step=1,
-                value=int(cliente["ruc"]) if cliente and cliente.get("ruc") else 0
+            st.session_state.ruc = st.text_input(
+                "RUC",
+                value=cliente.get("ruc", "") if cliente else "",
+                key="ruc_input"
             )
-            ruc = str(ruc).zfill(11)
+            st.session_state.ruc = self._solo_numeros(
+                st.session_state.ruc, 11
+            )
+            st.caption(f"{len(st.session_state.ruc)}/11 dígitos")
 
             nombres = apellidos = dni = None
 
-        telefono = st.number_input(
-            "Teléfono (9 dígitos)",
-            min_value=0,
-            max_value=999999999,
-            step=1,
-            value=int(cliente["telefono"]) if cliente and cliente.get("telefono") else 0
+        st.session_state.telefono = st.text_input(
+            "Teléfono",
+            value=cliente.get("telefono", "") if cliente else "",
+            key="telefono_input"
         )
-        telefono = str(telefono).zfill(9)
+        st.session_state.telefono = self._solo_numeros(
+            st.session_state.telefono, 9
+        )
+        st.caption(f"{len(st.session_state.telefono)}/9 dígitos")
 
         correo = st.text_input(
             "Correo electrónico",
@@ -101,13 +109,18 @@ class PClientes:
                 try:
                     if tipo == "PERSONA_NATURAL":
                         self.logica.registrar_persona_natural(
-                            nombres, apellidos, dni,
-                            telefono, correo
+                            nombres,
+                            apellidos,
+                            st.session_state.dni,
+                            st.session_state.telefono,
+                            correo
                         )
                     else:
                         self.logica.registrar_persona_juridica(
-                            razon_social, ruc,
-                            telefono, correo
+                            razon_social,
+                            st.session_state.ruc,
+                            st.session_state.telefono,
+                            correo
                         )
 
                     st.success("Cliente registrado correctamente")
@@ -118,7 +131,7 @@ class PClientes:
         with col2:
             if st.button("✏️ Editar Cliente") and cliente:
                 data = {
-                    "telefono": telefono,
+                    "telefono": st.session_state.telefono,
                     "correo": correo
                 }
 
@@ -126,12 +139,12 @@ class PClientes:
                     data.update({
                         "nombres": nombres,
                         "apellidos": apellidos,
-                        "dni": dni
+                        "dni": st.session_state.dni
                     })
                 else:
                     data.update({
                         "razon_social": razon_social,
-                        "ruc": ruc
+                        "ruc": st.session_state.ruc
                     })
 
                 self.logica.actualizar(cliente["id_cliente"], data)
@@ -145,5 +158,6 @@ class PClientes:
                 self._limpiar()
 
     def _limpiar(self):
-        st.session_state.cliente_sel = None
+        for k in ["cliente_sel", "dni", "ruc", "telefono"]:
+            st.session_state[k] = ""
         st.rerun()
