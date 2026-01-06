@@ -11,8 +11,8 @@ class PReservas:
     def interfaz(self):
         st.title("📅 Reservas - READY ONE")
 
-        reservas = self.negocio.listar()
         st.subheader("📋 Reservas registradas")
+        reservas = self.negocio.listar()
         st.dataframe(reservas, use_container_width=True)
 
         st.divider()
@@ -30,23 +30,18 @@ class PReservas:
 
         precio = st.number_input(
             "Precio (S/.)",
-            min_value=0.0,
+            min_value=1.0,
             step=10.0
         )
 
         estado = st.selectbox(
             "Estado",
-            [
-                "SOLICITADO",
-                "EN_PROCESO",
-                "CANCELADO",
-                "FINALIZADO"
-            ]
+            ["SOLICITADO", "EN_PROCESO", "CANCELADO", "FINALIZADO"]
         )
 
         observaciones = st.text_area("Observaciones")
 
-        if st.button("💾 Guardar Reserva"):
+        if st.button("💾 Guardar"):
             try:
                 self.negocio.registrar(
                     clientes[cliente],
@@ -54,7 +49,7 @@ class PReservas:
                     estado,
                     observaciones
                 )
-                st.success("✅ Reserva registrada correctamente")
+                st.success("Reserva registrada correctamente")
                 st.rerun()
             except Exception as e:
                 st.error(str(e))
