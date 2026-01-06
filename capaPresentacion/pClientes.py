@@ -12,65 +12,152 @@ class PClientes:
             if k not in st.session_state:
                 st.session_state[k] = ""
 
-    # ---------- FILTRO REAL ----------
-    def _filtrar(self, campo, max_len):
-        valor = st.session_state[campo]
+    def _solo_numeros(self, valor, max_len):
         valor = "".join(c for c in valor if c.isdigit())
-        st.session_state[campo] = valor[:max_len]
+        return valor[:max_len]
 
     def interfaz(self):
         st.title("👥 Gestión de Clientes - READY ONE")
 
         clientes = self.logica.listar()
 
-        sel = st.dataframe(
+        seleccion = st.dataframe(
             clientes,
-            selection_mode="single-row",
             use_container_width=True,
+            selection_mode="single-row",
             on_select="rerun"
         )
 
-        if sel.selection.rows:
-            st.session_state.cliente_sel = clientes[sel.selection.rows[0]]
+        if seleccion.selection.rows:
+            st.session_state.cliente_sel = clientes[
+                seleccion.selection.rows[0]
+            ]
 
         st.divider()
         self.formulario()
 
     def formulario(self):
+        st.subheader("📝 Registrar / Editar Cliente")
         cliente = st.session_state.cliente_sel
 
         tipo = st.selectbox(
             "Tipo de cliente",
-            ["PERSONA_NATURAL", "PERSONA_JURIDICA"]
+            ["PERSONA_NATURAL", "PERSONA_JURIDICA"],
+            index=0 if not cliente else
+            (0 if cliente["tipo_cliente"] == "PERSONA_NATURAL" else 1)
         )
 
         if tipo == "PERSONA_NATURAL":
-            st.text_input("Nombres")
-            st.text_input("Apellidos")
+            nombres = st.text_input(
+                "Nombres",
+                value="" if not cliente else cliente.get("nombres", "")
+            )
+            apellidos = st.text_input(
+                "Apellidos",
+                value="" if not cliente else cliente.get("apellidos", "")
+            )
 
-            st.text_input(
+            st.session_state.dni = st.text_input(
                 "DNI",
-                key="dni",
-                on_change=self._filtrar,
-                args=("dni", 8)
+                value=cliente.get("dni", "") if cliente else "",
+                key="dni_input"
+            )
+            st.session_state.dni = self._solo_numeros(
+                st.session_state.dni, 8
             )
             st.caption(f"{len(st.session_state.dni)}/8 dígitos")
 
-        else:
-            st.text_input("Razón Social")
+            razon_social = ruc = None
 
-            st.text_input(
+        else:
+            razon_social = st.text_input(
+                "Razón Social",
+                value="" if not cliente else cliente.get("razon_social", "")
+            )
+
+            st.session_state.ruc = st.text_input(
                 "RUC",
-                key="ruc",
-                on_change=self._filtrar,
-                args=("ruc", 11)
+                value=cliente.get("ruc", "") if cliente else "",
+                key="ruc_input"
+            )
+            st.session_state.ruc = self._solo_numeros(
+                st.session_state.ruc, 11
             )
             st.caption(f"{len(st.session_state.ruc)}/11 dígitos")
 
-        st.text_input(
+            nombres = apellidos = dni = None
+
+        st.session_state.telefono = st.text_input(
             "Teléfono",
-            key="telefono",
-            on_change=self._filtrar,
-            args=("telefono", 9)
+            value=cliente.get("telefono", "") if cliente else "",
+            key="telefono_input"
+        )
+        st.session_state.telefono = self._solo_numeros(
+            st.session_state.telefono, 9
         )
         st.caption(f"{len(st.session_state.telefono)}/9 dígitos")
+
+        correo = st.text_input(
+            "Correo electrónico",
+            value="" if not cliente else cliente.get("correo", "")
+        )
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            if st.button("💾 Guardar"):
+                try:
+                    if tipo == "PERSONA_NATURAL":
+                        self.logica.registrar_persona_natural(
+                            nombres,
+                            apellidos,
+                            st.session_state.dni,
+                            st.session_state.telefono,
+                            correo
+                        )
+                    else:
+                        self.logica.registrar_persona_juridica(
+                            razon_social,
+                            st.session_state.ruc,
+                            st.session_state.telefono,
+                            correo
+                        )
+
+                    st.success("Cliente registrado correctamente")
+                    self._limpiar()
+                except Exception as e:
+                    st.error(str(e))
+
+        with col2:
+            if st.button("✏️ Editar Cliente") and cliente:
+                data = {
+                    "telefono": st.session_state.telefono,
+                    "correo": correo
+                }
+
+                if tipo == "PERSONA_NATURAL":
+                    data.update({
+                        "nombres": nombres,
+                        "apellidos": apellidos,
+                        "dni": st.session_state.dni
+                    })
+                else:
+                    data.update({
+                        "razon_social": razon_social,
+                        "ruc": st.session_state.ruc
+                    })
+
+                self.logica.actualizar(cliente["id_cliente"], data)
+                st.success("Cliente actualizado correctamente")
+                self._limpiar()
+
+        with col3:
+            if st.button("🗑️ Eliminar") and cliente:
+                self.logica.eliminar(cliente["id_cliente"])
+                st.warning("Cliente eliminado")
+                self._limpiar()
+
+    def _limpiar(self):
+        for k in ["cliente_sel", "dni", "ruc", "telefono"]:
+            st.session_state[k] = ""
+        st.rerun()
