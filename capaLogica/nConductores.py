@@ -1,18 +1,9 @@
 from capaDatos.dConductores import DConductores
 
 class NConductores:
+
     def __init__(self):
         self.datos = DConductores()
-
-    # ========= VALIDACIONES =========
-
-    def _validar_telefono(self, telefono):
-        return telefono.isdigit() and len(telefono) == 9
-
-    def _validar_licencia(self, licencia):
-        return len(licencia) >= 8
-
-    # ========= CRUD =========
 
     def listar(self):
         return self.datos.listar()
@@ -21,51 +12,41 @@ class NConductores:
         self,
         nombres,
         apellidos,
-        licencia,
         telefono,
-        tiene_papeletas,
-        estado
+        tiene_papeletas=False,
+        estado="ACTIVO"   # valor por defecto
     ):
-        if not nombres or not apellidos:
-            raise ValueError("Nombres y apellidos son obligatorios")
+        if not estado:
+            estado = "ACTIVO"
 
-        if not self._validar_licencia(licencia):
-            raise ValueError("Licencia inválida")
-
-        if not self._validar_telefono(telefono):
-            raise ValueError("Teléfono inválido")
-
-        data = {
-            "nombres": nombres,
-            "apellidos": apellidos,
-            "licencia": licencia,
-            "telefono": telefono,
-            "tiene_papeletas": tiene_papeletas,
-            "estado": estado
-        }
-
-        return self.datos.insertar(data)
+        return self.datos.registrar(
+            nombres,
+            apellidos,
+            telefono,
+            tiene_papeletas,
+            estado
+        )
 
     def actualizar(
         self,
         id_conductor,
         nombres,
         apellidos,
-        licencia,
         telefono,
-        tiene_papeletas,
-        estado
+        tiene_papeletas=False,
+        estado="ACTIVO"
     ):
-        data = {
-            "nombres": nombres,
-            "apellidos": apellidos,
-            "licencia": licencia,
-            "telefono": telefono,
-            "tiene_papeletas": tiene_papeletas,
-            "estado": estado
-        }
+        if not estado:
+            estado = "ACTIVO"
 
-        return self.datos.actualizar(id_conductor, data)
+        return self.datos.actualizar(
+            id_conductor,
+            nombres,
+            apellidos,
+            telefono,
+            tiene_papeletas,
+            estado
+        )
 
     def eliminar(self, id_conductor):
         return self.datos.eliminar(id_conductor)
