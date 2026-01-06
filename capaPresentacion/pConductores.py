@@ -57,12 +57,6 @@ class PConductores:
             value=conductor.get("apellidos", "") if conductor else ""
         )
 
-        licencia = st.text_input(
-            "Licencia de conducir",
-            value=conductor.get("licencia", "") if conductor else "",
-            help="Ejemplo: A12345678, Q1234567"
-        )
-
         telefono_input = st.text_input(
             "Teléfono (9 dígitos)",
             value=conductor.get("telefono", "") if conductor else ""
@@ -92,7 +86,6 @@ class PConductores:
                         conductor,
                         nombres,
                         apellidos,
-                        licencia,
                         telefono,
                         tiene_papeletas,
                         estado
@@ -114,7 +107,6 @@ class PConductores:
         conductor,
         nombres,
         apellidos,
-        licencia,
         telefono,
         tiene_papeletas,
         estado
@@ -126,7 +118,6 @@ class PConductores:
                 conductor["id_conductor"],
                 nombres,
                 apellidos,
-                licencia,
                 telefono,
                 papeletas,
                 estado
@@ -136,7 +127,6 @@ class PConductores:
             self.logica.registrar(
                 nombres,
                 apellidos,
-                licencia,
                 telefono,
                 papeletas,
                 estado
