@@ -4,12 +4,9 @@ from capaLogica.nVehiculos import NVehiculos
 class PVehiculos:
     def __init__(self):
         self.logica = NVehiculos()
-        self._init_state()
-        self.interfaz()
-
-    def _init_state(self):
         if "vehiculo_sel" not in st.session_state:
             st.session_state.vehiculo_sel = None
+        self.interfaz()
 
     def interfaz(self):
         st.title("🚗 Gestión de Vehículos - READY ONE")
@@ -33,78 +30,58 @@ class PVehiculos:
         self.formulario()
 
     def formulario(self):
-        vehiculo = st.session_state.vehiculo_sel
+        v = st.session_state.vehiculo_sel
 
         st.subheader("📝 Registrar / Editar Vehículo")
 
         placa = st.text_input(
             "Placa",
-            value=vehiculo["placa"] if vehiculo else "",
-            placeholder="Ej: ABC-123",
-            help="Campo obligatorio. Mínimo 6 caracteres."
-        )
-
-        modelo = st.text_input(
-            "Modelo",
-            value=vehiculo["modelo"] if vehiculo else "",
-            placeholder="Ej: Hiace, Sprinter, Van",
-            help="Campo obligatorio. Describe el tipo de vehículo."
+            value=v["placa"] if v else "",
+            help="Placa del vehículo. Ejemplo: ABC-123"
         )
 
         capacidad = st.number_input(
-            "Capacidad de pasajeros",
+            "Capacidad",
             min_value=4,
-            step=1,
-            value=vehiculo["capacidad"] if vehiculo else 4,
-            help="Debe ser igual o mayor a 4 pasajeros."
+            value=v["capacidad"] if v else 4,
+            help="Número máximo de pasajeros"
         )
 
         estado = st.selectbox(
-            "Estado del vehículo",
+            "Estado",
             ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"],
-            help="Indica la disponibilidad actual del vehículo."
+            index=0 if not v else
+            ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"].index(v["estado"]),
+            help="Estado actual del vehículo"
         )
 
         col1, col2 = st.columns(2)
 
         with col1:
             if st.button("💾 Guardar"):
-                # 👉 VALIDACIÓN DIRECTA ANTES DE GUARDAR
-                if not placa or len(placa) < 6:
-                    st.warning("⚠️ Ingrese una placa válida (mínimo 6 caracteres)")
-                    return
-
-                if not modelo:
-                    st.warning("⚠️ El modelo es obligatorio")
-                    return
-
                 try:
-                    if vehiculo:
+                    if v:
                         self.logica.actualizar(
-                            vehiculo["id_vehiculo"],
+                            v["id_vehiculo"],
                             placa,
-                            modelo,
                             capacidad,
                             estado
                         )
-                        st.success("✅ Vehículo actualizado correctamente")
+                        st.success("Vehículo actualizado")
                     else:
                         self.logica.registrar(
                             placa,
-                            modelo,
                             capacidad,
                             estado
                         )
-                        st.success("✅ Vehículo registrado correctamente")
+                        st.success("Vehículo registrado")
 
                     self._limpiar()
                 except Exception as e:
                     st.error(str(e))
 
         with col2:
-            if st.button("🗑️ Eliminar") and vehiculo:
-                self.logica.eliminar(vehiculo["id_vehiculo"])
-                st.warning("Vehículo eliminado")
+            if st.button("🧹 Limpiar"):
                 self._limpiar()
 
     def _limpiar(self):
