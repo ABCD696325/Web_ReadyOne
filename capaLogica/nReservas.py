@@ -51,7 +51,7 @@ class NReservas:
             "fecha_reserva": fecha_reserva.isoformat(),
             "metodo_pago": metodo_pago,
             "monto_total": float(monto),
-            "estado_reserva": estado,
+            "estado": estado,            # ✅ CAMBIO CLAVE
             "observaciones": observaciones
         }
 
