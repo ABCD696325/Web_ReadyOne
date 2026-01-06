@@ -1,7 +1,6 @@
 import streamlit as st
 from capaLogica.nReservas import NReservas
 from capaLogica.nClientes import NClientes
-from datetime import date
 
 class PReservas:
     def __init__(self):
@@ -10,7 +9,7 @@ class PReservas:
         self.interfaz()
 
     def interfaz(self):
-        st.title("📅 Gestión de Reservas - READY ONE")
+        st.title("📅 Reservas - READY ONE")
 
         reservas = self.logica.listar()
         st.subheader("📋 Reservas registradas")
@@ -29,44 +28,23 @@ class PReservas:
 
         cliente = st.selectbox("Cliente", list(clientes.keys()))
 
-        tipo_servicio = st.selectbox(
-            "Tipo de servicio",
-            [
-                "tour",
-                "viaje personalizado",
-                "aeropuerto de jauja"
-            ]
+        estado = st.selectbox(
+            "Estado",
+            ["DISPONIBLE", "EN_PROCESO", "CANCELADO"]
         )
 
-        fecha_servicio = st.date_input(
-            "Fecha del servicio",
-            min_value=date.today()
+        precio = st.number_input(
+            "Precio (S/.)",
+            min_value=1.0,
+            step=10.0
         )
-
-        hora_servicio = st.time_input("Hora del servicio")
-
-        ciudad_origen = st.text_input("Ciudad origen")
-        ciudad_destino = st.text_input("Ciudad destino")
-
-        numero_pasajeros = st.number_input(
-            "Número de pasajeros",
-            min_value=1,
-            step=1
-        )
-
-        observaciones = st.text_area("Observaciones")
 
         if st.button("💾 Guardar"):
             try:
                 self.logica.registrar(
                     clientes[cliente],
-                    tipo_servicio,
-                    fecha_servicio,
-                    hora_servicio,
-                    ciudad_origen,
-                    ciudad_destino,
-                    numero_pasajeros,
-                    observaciones
+                    estado,
+                    precio
                 )
                 st.success("Reserva registrada correctamente")
                 st.rerun()

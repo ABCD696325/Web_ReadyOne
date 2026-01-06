@@ -1,5 +1,4 @@
 from capaDatos.dReservas import DReservas
-from datetime import date
 
 class NReservas:
     def __init__(self):
@@ -8,29 +7,14 @@ class NReservas:
     def listar(self):
         return self.datos.listar()
 
-    def registrar(
-        self,
-        id_cliente,
-        tipo_servicio,
-        fecha_servicio,
-        hora_servicio,
-        ciudad_origen,
-        ciudad_destino,
-        numero_pasajeros,
-        observaciones
-    ):
-        if fecha_servicio < date.today():
-            raise ValueError("La fecha no puede ser pasada")
+    def registrar(self, id_cliente, estado, precio):
+        if precio <= 0:
+            raise ValueError("El precio debe ser mayor a 0")
 
         data = {
             "id_cliente": id_cliente,
-            "tipo_servicio": tipo_servicio,
-            "fecha_servicio": fecha_servicio.isoformat(),
-            "hora_servicio": hora_servicio,
-            "ciudad_origen": ciudad_origen,
-            "ciudad_destino": ciudad_destino,
-            "numero_pasajeros": int(numero_pasajeros),
-            "observaciones": observaciones
+            "estado": estado,
+            "precio": float(precio)
         }
 
         return self.datos.insertar(data)
