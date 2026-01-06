@@ -64,16 +64,16 @@ class PConductores:
         telefono = self._solo_numeros(telefono_input, 9)
         st.caption(f"{len(telefono)}/9")
 
-        tiene_papeletas = st.selectbox(
+        papeletas = st.text_input(
             "¿Tiene papeletas?",
-            ["NO", "SÍ"],
-            index=1 if conductor and conductor.get("tiene_papeletas") else 0
+            value=str(conductor.get("tiene_papeletas", "")) if conductor else "",
+            help="Escriba: SI o NO"
         )
 
-        estado = st.selectbox(
+        estado = st.text_input(
             "Estado del conductor",
-            ["ACTIVO", "INACTIVO"],
-            index=0 if not conductor or conductor.get("estado") == "ACTIVO" else 1
+            value=conductor.get("estado", "") if conductor else "",
+            help="Valores permitidos: ACTIVO o INACTIVO"
         )
 
         col1, col2 = st.columns(2)
@@ -87,7 +87,7 @@ class PConductores:
                         nombres,
                         apellidos,
                         telefono,
-                        tiene_papeletas,
+                        papeletas,
                         estado
                     )
                 except Exception as e:
@@ -108,10 +108,12 @@ class PConductores:
         nombres,
         apellidos,
         telefono,
-        tiene_papeletas,
+        papeletas,
         estado
     ):
-        papeletas = True if tiene_papeletas == "SÍ" else False
+        # Normalización básica
+        tiene_papeletas = True if str(papeletas).upper() == "SI" else False
+        estado = estado.upper()
 
         if conductor:
             self.logica.actualizar(
@@ -119,17 +121,16 @@ class PConductores:
                 nombres,
                 apellidos,
                 telefono,
-                papeletas,
+                tiene_papeletas,
                 estado
             )
             st.success("Conductor actualizado correctamente")
         else:
-            # 👉 AQUÍ ESTABA EL ERROR: faltaba `estado`
             self.logica.registrar(
                 nombres,
                 apellidos,
                 telefono,
-                papeletas,
+                tiene_papeletas,
                 estado
             )
             st.success("Conductor registrado correctamente")
