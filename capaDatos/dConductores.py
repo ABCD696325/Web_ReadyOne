@@ -9,10 +9,22 @@ class DConductores:
         response = self.db.table(self.tabla).select("*").execute()
         return response.data
 
-    def insertar(self, data):
+    def insertar(self, nombres, apellidos, telefono, estado):
+        data = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "telefono": telefono,
+            "estado": estado
+        }
         return self.db.table(self.tabla).insert(data).execute()
 
-    def actualizar(self, id_conductor, data):
+    def actualizar(self, id_conductor, nombres, apellidos, telefono, estado):
+        data = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "telefono": telefono,
+            "estado": estado
+        }
         return (
             self.db.table(self.tabla)
             .update(data)

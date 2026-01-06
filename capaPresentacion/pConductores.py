@@ -1,27 +1,15 @@
 import streamlit as st
 from capaLogica.nConductores import NConductores
 
-
 class PConductores:
     def __init__(self):
         self.logica = NConductores()
         self._init_state()
         self.interfaz()
 
-    # ================== ESTADO ==================
-
     def _init_state(self):
         if "conductor_sel" not in st.session_state:
             st.session_state.conductor_sel = None
-
-    # ================== UTIL ==================
-
-    def _solo_numeros(self, valor, limite):
-        if valor is None:
-            return ""
-        return "".join(c for c in str(valor) if c.isdigit())[:limite]
-
-    # ================== UI ==================
 
     def interfaz(self):
         st.title("👨‍✈️ Gestión de Conductores - READY ONE")
@@ -49,95 +37,58 @@ class PConductores:
 
         nombres = st.text_input(
             "Nombres",
-            value=conductor.get("nombres", "") if conductor else ""
+            value=conductor["nombres"] if conductor else ""
         )
 
         apellidos = st.text_input(
             "Apellidos",
-            value=conductor.get("apellidos", "") if conductor else ""
+            value=conductor["apellidos"] if conductor else ""
         )
 
-        telefono_input = st.text_input(
+        telefono = st.text_input(
             "Teléfono (9 dígitos)",
-            value=conductor.get("telefono", "") if conductor else ""
-        )
-        telefono = self._solo_numeros(telefono_input, 9)
-        st.caption(f"{len(telefono)}/9")
-
-        papeletas = st.text_input(
-            "¿Tiene papeletas?",
-            value=str(conductor.get("tiene_papeletas", "")) if conductor else "",
-            help="Escriba: SI o NO"
+            max_chars=9,
+            value=conductor["telefono"] if conductor else ""
         )
 
         estado = st.text_input(
-            "Estado del conductor",
-            value=conductor.get("estado", "") if conductor else "",
-            help="Valores permitidos: ACTIVO o INACTIVO"
+            "Estado",
+            value=conductor["estado"] if conductor else "ACTIVO",
+            help="Escriba ACTIVO o INACTIVO"
         )
 
         col1, col2 = st.columns(2)
 
-        # ================== GUARDAR ==================
         with col1:
             if st.button("💾 Guardar"):
                 try:
-                    self._guardar(
-                        conductor,
-                        nombres,
-                        apellidos,
-                        telefono,
-                        papeletas,
-                        estado
-                    )
+                    if conductor:
+                        self.logica.actualizar(
+                            conductor["id_conductor"],
+                            nombres,
+                            apellidos,
+                            telefono,
+                            estado
+                        )
+                        st.success("Conductor actualizado correctamente")
+                    else:
+                        self.logica.registrar(
+                            nombres,
+                            apellidos,
+                            telefono,
+                            estado
+                        )
+                        st.success("Conductor registrado correctamente")
+
+                    self._limpiar()
                 except Exception as e:
                     st.error(str(e))
 
-        # ================== ELIMINAR ==================
         with col2:
             if st.button("🗑️ Eliminar") and conductor:
                 self.logica.eliminar(conductor["id_conductor"])
                 st.warning("Conductor eliminado")
                 self._limpiar()
-
-    # ================== LOGICA ==================
-
-    def _guardar(
-        self,
-        conductor,
-        nombres,
-        apellidos,
-        telefono,
-        papeletas,
-        estado
-    ):
-        # Normalización básica
-        tiene_papeletas = True if str(papeletas).upper() == "SI" else False
-        estado = estado.upper()
-
-        if conductor:
-            self.logica.actualizar(
-                conductor["id_conductor"],
-                nombres,
-                apellidos,
-                telefono,
-                tiene_papeletas,
-                estado
-            )
-            st.success("Conductor actualizado correctamente")
-        else:
-            self.logica.registrar(
-                nombres,
-                apellidos,
-                telefono,
-                tiene_papeletas,
-                estado
-            )
-            st.success("Conductor registrado correctamente")
-
-        self._limpiar()
-
-    # ================== LIMPIAR ==================
 
     def _limpiar(self):
         st.session_state.conductor_sel = None
