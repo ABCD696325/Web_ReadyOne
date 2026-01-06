@@ -6,6 +6,7 @@ from capaLogica.nVehiculos import NVehiculos
 from capaLogica.nConductores import NConductores
 from datetime import date
 
+
 class PReservas:
     def __init__(self):
         self.logica = NReservas()
@@ -54,7 +55,7 @@ class PReservas:
         }
 
         vehiculos = {
-            f"{v['placa']} | {v['modelo']} | {v['capacidad_pasajeros']} pax": v["id_vehiculo"]
+            f"{v['placa']} | {v['capacidad']} pax | {v['estado']}": v["id_vehiculo"]
             for v in self.vehiculos.listar()
         }
 

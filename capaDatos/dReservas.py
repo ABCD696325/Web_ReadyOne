@@ -1,12 +1,14 @@
 from conexion import ConexionDB
 
+
 class DReservas:
     def __init__(self):
         self.db = ConexionDB().conectar()
         self.tabla = "reservas"
 
     def listar(self):
-        return self.db.table(self.tabla).select("*").execute().data
+        response = self.db.table(self.tabla).select("*").execute()
+        return response.data
 
     def insertar(self, data):
         return self.db.table(self.tabla).insert(data).execute()

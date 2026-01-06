@@ -1,11 +1,12 @@
 from capaDatos.dReservas import DReservas
 from datetime import date
 
+
 class NReservas:
     def __init__(self):
         self.datos = DReservas()
 
-    # ===== VALIDACIONES =====
+    # ========= VALIDACIONES =========
 
     def _validar_fecha(self, fecha):
         return fecha >= date.today()
@@ -19,7 +20,7 @@ class NReservas:
             "CANCELADA"
         ]
 
-    # ===== CRUD =====
+    # ========= CRUD =========
 
     def listar(self):
         return self.datos.listar()
@@ -37,10 +38,10 @@ class NReservas:
         observaciones
     ):
         if not self._validar_fecha(fecha_reserva):
-            raise ValueError("La fecha de reserva no puede ser pasada")
+            raise ValueError("La fecha no puede ser anterior a hoy")
 
         if not self._validar_estado(estado):
-            raise ValueError("Estado de reserva inválido")
+            raise ValueError("Estado inválido")
 
         data = {
             "id_cliente": id_cliente,
