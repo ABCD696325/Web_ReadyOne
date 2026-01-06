@@ -13,19 +13,20 @@ class NVehiculos:
     def listar(self):
         return self.datos.listar()
 
-    def registrar(self, placa, marca, modelo, capacidad, estado):
+    def registrar(self, placa, modelo, capacidad, estado):
+        capacidad = int(capacidad)
+
         if not self._validar_placa(placa):
             raise ValueError("La placa debe tener al menos 6 caracteres")
 
         if not self._validar_capacidad(capacidad):
             raise ValueError("La capacidad mínima es 4 pasajeros")
 
-        if not marca or not modelo:
-            raise ValueError("Marca y modelo son obligatorios")
+        if not modelo:
+            raise ValueError("El modelo es obligatorio")
 
         data = {
             "placa": placa.upper(),
-            "marca": marca,
             "modelo": modelo,
             "capacidad": capacidad,
             "estado": estado
@@ -33,10 +34,11 @@ class NVehiculos:
 
         return self.datos.insertar(data)
 
-    def actualizar(self, id_vehiculo, placa, marca, modelo, capacidad, estado):
+    def actualizar(self, id_vehiculo, placa, modelo, capacidad, estado):
+        capacidad = int(capacidad)
+
         data = {
             "placa": placa.upper(),
-            "marca": marca,
             "modelo": modelo,
             "capacidad": capacidad,
             "estado": estado

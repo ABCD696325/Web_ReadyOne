@@ -40,57 +40,58 @@ class PVehiculos:
             help="Mínimo 6 caracteres"
         )
 
-        marca = st.text_input(
-            "Marca",
-            value=vehiculo["marca"] if vehiculo else ""
-        )
-
         modelo = st.text_input(
             "Modelo",
             value=vehiculo["modelo"] if vehiculo else ""
         )
 
         capacidad = st.number_input(
-            "Capacidad",
+            "Capacidad de pasajeros",
             min_value=4,
             step=1,
             value=vehiculo["capacidad"] if vehiculo else 4
         )
 
         estado = st.selectbox(
-            "Estado",
+            "Estado del vehículo",
             ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"],
             index=0 if not vehiculo else
-            ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"].index(
-                vehiculo["estado"]
-            )
+            ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"]
+            .index(vehiculo["estado"])
         )
 
-        if st.button("💾 Guardar"):
-            try:
-                if vehiculo:
-                    self.logica.actualizar(
-                        vehiculo["id_vehiculo"],
-                        placa,
-                        marca,
-                        modelo,
-                        capacidad,
-                        estado
-                    )
-                    st.success("Vehículo actualizado")
-                else:
-                    self.logica.registrar(
-                        placa,
-                        marca,
-                        modelo,
-                        capacidad,
-                        estado
-                    )
-                    st.success("Vehículo registrado")
+        col1, col2 = st.columns(2)
 
+        with col1:
+            if st.button("💾 Guardar"):
+                try:
+                    if vehiculo:
+                        self.logica.actualizar(
+                            vehiculo["id_vehiculo"],
+                            placa,
+                            modelo,
+                            capacidad,
+                            estado
+                        )
+                        st.success("Vehículo actualizado correctamente")
+                    else:
+                        self.logica.registrar(
+                            placa,
+                            modelo,
+                            capacidad,
+                            estado
+                        )
+                        st.success("Vehículo registrado correctamente")
+
+                    self._limpiar()
+                except Exception as e:
+                    st.error(str(e))
+
+        with col2:
+            if st.button("🗑️ Eliminar") and vehiculo:
+                self.logica.eliminar(vehiculo["id_vehiculo"])
+                st.warning("Vehículo eliminado")
                 self._limpiar()
-            except Exception as e:
-                st.error(str(e))
 
     def _limpiar(self):
         st.session_state.vehiculo_sel = None
