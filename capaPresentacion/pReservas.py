@@ -1,7 +1,6 @@
 import streamlit as st
 from capaLogica.nReservas import NReservas
 from capaLogica.nClientes import NClientes
-from capaLogica.nServicios import NServicios
 from capaLogica.nVehiculos import NVehiculos
 
 
@@ -9,7 +8,6 @@ class PReservas:
     def __init__(self):
         self.logica = NReservas()
         self.clientes = NClientes()
-        self.servicios = NServicios()
         self.vehiculos = NVehiculos()
         self.interfaz()
 
@@ -28,11 +26,6 @@ class PReservas:
             for c in self.clientes.listar()
         }
 
-        servicios = {
-            f"{s['tipo_servicio']} | {s['ciudad_origen']} → {s['ciudad_destino']}": s["id_servicio"]
-            for s in self.servicios.listar()
-        }
-
         vehiculos = {
             f"{v['placa']} | {v['capacidad']} pax": v["id_vehiculo"]
             for v in self.vehiculos.listar()
@@ -41,7 +34,6 @@ class PReservas:
         st.subheader("📝 Registrar Reserva")
 
         cliente = st.selectbox("Cliente", clientes.keys())
-        servicio = st.selectbox("Servicio", servicios.keys())
         vehiculo = st.selectbox("Vehículo", vehiculos.keys())
 
         metodo_pago = st.selectbox(
@@ -51,9 +43,10 @@ class PReservas:
 
         monto = st.number_input("Monto total", min_value=0.0, step=10.0)
 
-        estado = st.selectbox(
+        estado = st.text_input(
             "Estado",
-            ["PENDIENTE", "CONFIRMADA", "EN_PROCESO", "FINALIZADA", "CANCELADA"]
+            value="PENDIENTE",
+            help="Ejemplo: PENDIENTE, CONFIRMADA, CANCELADA"
         )
 
         observaciones = st.text_area("Observaciones")
@@ -62,7 +55,6 @@ class PReservas:
             try:
                 self.logica.registrar(
                     clientes[cliente],
-                    servicios[servicio],
                     vehiculos[vehiculo],
                     metodo_pago,
                     monto,
