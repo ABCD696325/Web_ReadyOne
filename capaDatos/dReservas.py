@@ -7,8 +7,7 @@ class DReservas:
         self.tabla = "reservas"
 
     def listar(self):
-        response = self.db.table(self.tabla).select("*").execute()
-        return response.data
+        return self.db.table(self.tabla).select("*").execute().data
 
     def insertar(self, data):
         return self.db.table(self.tabla).insert(data).execute()

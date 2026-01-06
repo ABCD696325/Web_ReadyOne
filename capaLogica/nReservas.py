@@ -31,13 +31,13 @@ class NReservas:
         id_servicio,
         id_vehiculo,
         id_conductor,
-        fecha_reserva,
+        fecha,
         metodo_pago,
         monto,
         estado,
         observaciones
     ):
-        if not self._validar_fecha(fecha_reserva):
+        if not self._validar_fecha(fecha):
             raise ValueError("La fecha no puede ser anterior a hoy")
 
         if not self._validar_estado(estado):
@@ -48,10 +48,10 @@ class NReservas:
             "id_servicio": id_servicio,
             "id_vehiculo": id_vehiculo,
             "id_conductor": id_conductor,
-            "fecha_reserva": fecha_reserva.isoformat(),
+            "fecha": fecha.isoformat(),   # ✅ CAMBIO CLAVE
             "metodo_pago": metodo_pago,
             "monto_total": float(monto),
-            "estado": estado,            # ✅ CAMBIO CLAVE
+            "estado": estado,
             "observaciones": observaciones
         }
 
