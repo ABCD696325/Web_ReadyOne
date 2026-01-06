@@ -12,21 +12,19 @@ class PClientes:
             st.session_state.cliente_sel = None
         if "dni" not in st.session_state:
             st.session_state.dni = ""
-        if "telefono" not in st.session_state:
-            st.session_state.telefono = ""
         if "ruc" not in st.session_state:
             st.session_state.ruc = ""
-        if "tipo_cliente" not in st.session_state:
-            st.session_state.tipo_cliente = "Natural"
+        if "telefono" not in st.session_state:
+            st.session_state.telefono = ""
 
-    def _solo_numeros(self, valor, max_len):
-        return "".join(c for c in valor if c.isdigit())[:max_len]
+    # 🔒 SOLO NÚMEROS + LÍMITE
+    def _solo_numeros(self, valor, limite):
+        return "".join(c for c in valor if c.isdigit())[:limite]
 
     def interfaz(self):
-        st.title("👤 Gestión de Clientes - READY ONE")
+        st.title("👥 Gestión de Clientes - READY ONE")
 
         clientes = self.logica.listar()
-        st.subheader("📋 Clientes Registrados")
 
         seleccion = st.dataframe(
             clientes,
@@ -36,62 +34,75 @@ class PClientes:
         )
 
         if seleccion.selection.rows:
-            st.session_state.cliente_sel = clientes[
-                seleccion.selection.rows[0]
-            ]
+            idx = seleccion.selection.rows[0]
+            st.session_state.cliente_sel = clientes[idx]
+
+            # CARGAR DATOS PARA EDITAR
+            st.session_state.telefono = clientes[idx].get("telefono", "")
+            st.session_state.dni = clientes[idx].get("dni", "")
+            st.session_state.ruc = clientes[idx].get("ruc", "")
 
         st.divider()
         self.formulario()
 
     def formulario(self):
-        cliente = st.session_state.cliente_sel
-
         st.subheader("📝 Registrar / Editar Cliente")
 
-        # -------- TIPO DE CLIENTE --------
-        tipo_cliente = st.selectbox(
-            "Tipo de Cliente",
-            ["Natural", "Jurídico"],
-            index=0 if not cliente else
-            (0 if cliente["tipo_cliente"] == "Natural" else 1)
-        )
-        st.session_state.tipo_cliente = tipo_cliente
+        cliente = st.session_state.cliente_sel
 
-        nombres = st.text_input(
-            "Nombres",
-            value=cliente["nombres"] if cliente else ""
+        tipo = st.selectbox(
+            "Tipo de cliente",
+            ["PERSONA_NATURAL", "PERSONA_JURIDICA"],
+            index=0 if not cliente or cliente["tipo_cliente"] == "PERSONA_NATURAL" else 1
         )
 
-        apellidos = st.text_input(
-            "Apellidos",
-            value=cliente["apellidos"] if cliente else ""
-        )
+        # ========= PERSONA NATURAL =========
+        if tipo == "PERSONA_NATURAL":
+            nombres = st.text_input(
+                "Nombres",
+                value=cliente["nombres"] if cliente else ""
+            )
+            apellidos = st.text_input(
+                "Apellidos",
+                value=cliente["apellidos"] if cliente else ""
+            )
 
-        # -------- DNI --------
-        dni_raw = st.text_input(
-            "DNI (8 dígitos)",
-            max_chars=8,
-            value=cliente["dni"] if cliente else ""
-        )
-        st.session_state.dni = self._solo_numeros(dni_raw, 8)
-        st.caption(f"{len(st.session_state.dni)}/8 dígitos")
+            dni_input = st.text_input(
+                "DNI (8 dígitos)",
+                max_chars=8,
+                value=st.session_state.dni
+            )
+            st.session_state.dni = self._solo_numeros(dni_input, 8)
+            st.caption(f"{len(st.session_state.dni)}/8 dígitos")
 
-        # -------- RUC --------
-        ruc_raw = st.text_input(
-            "RUC (11 dígitos)",
-            max_chars=11,
-            value=cliente["ruc"] if cliente else ""
-        )
-        st.session_state.ruc = self._solo_numeros(ruc_raw, 11)
-        st.caption(f"{len(st.session_state.ruc)}/11 dígitos")
+            razon_social = None
+            ruc = None
 
-        # -------- TELÉFONO --------
-        tel_raw = st.text_input(
+        # ========= PERSONA JURÍDICA =========
+        else:
+            razon_social = st.text_input(
+                "Razón Social",
+                value=cliente["razon_social"] if cliente else ""
+            )
+
+            ruc_input = st.text_input(
+                "RUC (11 dígitos)",
+                max_chars=11,
+                value=st.session_state.ruc
+            )
+            st.session_state.ruc = self._solo_numeros(ruc_input, 11)
+            st.caption(f"{len(st.session_state.ruc)}/11 dígitos")
+
+            nombres = None
+            apellidos = None
+
+        # ========= TELÉFONO =========
+        telefono_input = st.text_input(
             "Teléfono (9 dígitos)",
             max_chars=9,
-            value=cliente["telefono"] if cliente else ""
+            value=st.session_state.telefono
         )
-        st.session_state.telefono = self._solo_numeros(tel_raw, 9)
+        st.session_state.telefono = self._solo_numeros(telefono_input, 9)
         st.caption(f"{len(st.session_state.telefono)}/9 dígitos")
 
         correo = st.text_input(
@@ -105,31 +116,50 @@ class PClientes:
         with col1:
             if st.button("💾 Guardar"):
                 try:
-                    if cliente:
+                    if cliente:  # 👉 EDITAR
+                        if tipo == "PERSONA_NATURAL":
+                            data = {
+                                "nombres": nombres,
+                                "apellidos": apellidos,
+                                "dni": st.session_state.dni,
+                                "telefono": st.session_state.telefono,
+                                "correo": correo
+                            }
+                        else:
+                            data = {
+                                "razon_social": razon_social,
+                                "ruc": st.session_state.ruc,
+                                "telefono": st.session_state.telefono,
+                                "correo": correo
+                            }
+
                         self.logica.actualizar(
                             cliente["id_cliente"],
-                            st.session_state.tipo_cliente,
-                            nombres,
-                            apellidos,
-                            st.session_state.dni,
-                            st.session_state.ruc,
-                            st.session_state.telefono,
-                            correo
+                            data
                         )
                         st.success("Cliente actualizado correctamente")
-                    else:
-                        self.logica.registrar(
-                            st.session_state.tipo_cliente,
-                            nombres,
-                            apellidos,
-                            st.session_state.dni,
-                            st.session_state.ruc,
-                            st.session_state.telefono,
-                            correo
-                        )
+
+                    else:  # 👉 REGISTRAR
+                        if tipo == "PERSONA_NATURAL":
+                            self.logica.registrar_persona_natural(
+                                nombres,
+                                apellidos,
+                                st.session_state.dni,
+                                st.session_state.telefono,
+                                correo
+                            )
+                        else:
+                            self.logica.registrar_persona_juridica(
+                                razon_social,
+                                st.session_state.ruc,
+                                st.session_state.telefono,
+                                correo
+                            )
+
                         st.success("Cliente registrado correctamente")
 
                     self._limpiar()
+
                 except Exception as e:
                     st.error(str(e))
 
@@ -142,7 +172,6 @@ class PClientes:
     def _limpiar(self):
         st.session_state.cliente_sel = None
         st.session_state.dni = ""
-        st.session_state.telefono = ""
         st.session_state.ruc = ""
-        st.session_state.tipo_cliente = "Natural"
+        st.session_state.telefono = ""
         st.rerun()
