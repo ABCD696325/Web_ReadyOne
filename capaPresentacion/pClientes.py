@@ -11,6 +11,11 @@ class PClientes:
         if "cliente_sel" not in st.session_state:
             st.session_state.cliente_sel = None
 
+    def _solo_numeros(self, valor, max_len):
+        if valor is None:
+            return ""
+        return "".join(filter(str.isdigit, valor))[:max_len]
+
     def interfaz(self):
         st.title("👥 Gestión de Clientes - READY ONE")
 
@@ -33,24 +38,55 @@ class PClientes:
     def formulario(self):
         st.subheader("📝 Registrar / Editar Cliente")
 
+        cliente = st.session_state.cliente_sel
+
         tipo = st.selectbox(
             "Tipo de cliente",
-            ["PERSONA_NATURAL", "PERSONA_JURIDICA"]
+            ["PERSONA_NATURAL", "PERSONA_JURIDICA"],
+            index=0 if not cliente else
+            (0 if cliente["tipo_cliente"] == "PERSONA_NATURAL" else 1)
         )
 
         if tipo == "PERSONA_NATURAL":
-            nombres = st.text_input("Nombres")
-            apellidos = st.text_input("Apellidos")
-            dni = st.text_input("DNI (8 dígitos)")
+            nombres = st.text_input(
+                "Nombres",
+                value="" if not cliente else cliente.get("nombres", "")
+            )
+            apellidos = st.text_input(
+                "Apellidos",
+                value="" if not cliente else cliente.get("apellidos", "")
+            )
+
+            dni = st.text_input(
+                "DNI (8 dígitos)",
+                value="" if not cliente else cliente.get("dni", "")
+            )
+            dni = self._solo_numeros(dni, 8)
+
             razon_social = ruc = None
         else:
-            razon_social = st.text_input("Razón Social")
-            ruc = st.text_input("RUC (11 dígitos)")
+            razon_social = st.text_input(
+                "Razón Social",
+                value="" if not cliente else cliente.get("razon_social", "")
+            )
+
+            ruc = st.text_input(
+                "RUC (11 dígitos)",
+                value="" if not cliente else cliente.get("ruc", "")
+            )
+            ruc = self._solo_numeros(ruc, 11)
+
             nombres = apellidos = dni = None
 
-        telefono = st.text_input("Teléfono")
+        telefono = st.text_input(
+            "Teléfono (9 dígitos)",
+            value="" if not cliente else cliente.get("telefono", "")
+        )
+        telefono = self._solo_numeros(telefono, 9)
+
         correo = st.text_input(
             "Correo electrónico",
+            value="" if not cliente else cliente.get("correo", ""),
             help="Ejemplo: usuario@gmail.com"
         )
 
@@ -76,15 +112,32 @@ class PClientes:
                     st.error(str(e))
 
         with col2:
-            if st.button("🗑️ Eliminar") and st.session_state.cliente_sel:
-                self.logica.eliminar(
-                    st.session_state.cliente_sel["id_cliente"]
-                )
-                st.warning("Cliente eliminado")
+            if st.button("✏️ Editar Cliente") and cliente:
+                data = {
+                    "telefono": telefono,
+                    "correo": correo
+                }
+
+                if tipo == "PERSONA_NATURAL":
+                    data.update({
+                        "nombres": nombres,
+                        "apellidos": apellidos,
+                        "dni": dni
+                    })
+                else:
+                    data.update({
+                        "razon_social": razon_social,
+                        "ruc": ruc
+                    })
+
+                self.logica.actualizar(cliente["id_cliente"], data)
+                st.success("Cliente actualizado correctamente")
                 self._limpiar()
 
         with col3:
-            if st.button("🧹 Limpiar"):
+            if st.button("🗑️ Eliminar") and cliente:
+                self.logica.eliminar(cliente["id_cliente"])
+                st.warning("Cliente eliminado")
                 self._limpiar()
 
     def _limpiar(self):
