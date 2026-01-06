@@ -11,8 +11,8 @@ class PReservas:
     def interfaz(self):
         st.title("📅 Reservas - READY ONE")
 
-        st.subheader("📋 Reservas registradas")
         reservas = self.negocio.listar()
+        st.subheader("📋 Reservas registradas")
         st.dataframe(reservas, use_container_width=True)
 
         st.divider()
@@ -36,7 +36,7 @@ class PReservas:
 
         estado = st.selectbox(
             "Estado",
-            ["SOLICITADO", "EN_PROCESO", "CANCELADO", "FINALIZADO"]
+            ["DISPONIBLE", "EN_PROCESO", "CANCELADO", "FINALIZADO"]
         )
 
         observaciones = st.text_area("Observaciones")
