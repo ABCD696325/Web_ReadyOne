@@ -1,7 +1,7 @@
 import streamlit as st
 from capaLogica.nReservas import NReservas
 from capaLogica.nClientes import NClientes
-
+from datetime import date, time
 
 class PReservas:
     def __init__(self):
@@ -12,46 +12,47 @@ class PReservas:
     def interfaz(self):
         st.title("📅 Gestión de Reservas - READY ONE")
 
-        reservas = self.logica.listar()
-        st.subheader("📋 Reservas registradas")
-        st.dataframe(reservas, use_container_width=True)
+        st.subheader("📝 Registrar Reserva")
 
-        st.divider()
-        self.formulario()
-
-    def formulario(self):
         clientes = {
             f"{c['nombres']} {c['apellidos']}": c["id_cliente"]
             for c in self.clientes.listar()
         }
 
-        st.subheader("📝 Registrar Reserva")
+        cliente = st.selectbox("Cliente", list(clientes.keys()))
 
-        cliente = st.selectbox("Cliente", clientes.keys())
-
-        monto = st.number_input(
-            "Monto total (S/.)",
-            min_value=0.0,
-            step=10.0
+        tipo_servicio = st.selectbox(
+            "Tipo de servicio",
+            ["TAXI", "DELIVERY", "TOUR", "TRASLADO"]
         )
 
-        estado = st.text_input(
-            "Estado",
-            value="PENDIENTE",
-            help="Ejemplo: PENDIENTE, CONFIRMADA, CANCELADA"
+        fecha = st.date_input("Fecha del servicio", min_value=date.today())
+        hora = st.time_input("Hora del servicio", value=time(8, 0))
+
+        ciudad_origen = st.text_input("Ciudad de origen")
+        ciudad_destino = st.text_input("Ciudad de destino")
+
+        pasajeros = st.number_input(
+            "Número de pasajeros",
+            min_value=1,
+            step=1
         )
 
         observaciones = st.text_area("Observaciones")
 
-        if st.button("💾 Guardar Reserva"):
+        if st.button("💾 Guardar"):
             try:
                 self.logica.registrar(
                     clientes[cliente],
-                    monto,
-                    estado,
+                    tipo_servicio,
+                    fecha,
+                    hora,
+                    ciudad_origen,
+                    ciudad_destino,
+                    pasajeros,
                     observaciones
                 )
-                st.success("Reserva registrada correctamente")
+                st.success("✅ Reserva registrada correctamente")
                 st.rerun()
             except Exception as e:
                 st.error(str(e))

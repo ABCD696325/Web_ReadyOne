@@ -1,6 +1,5 @@
 from conexion import ConexionDB
 
-
 class DReservas:
     def __init__(self):
         self.db = ConexionDB().conectar()
