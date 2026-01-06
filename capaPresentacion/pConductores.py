@@ -124,6 +124,7 @@ class PConductores:
             )
             st.success("Conductor actualizado correctamente")
         else:
+            # 👉 AQUÍ ESTABA EL ERROR: faltaba `estado`
             self.logica.registrar(
                 nombres,
                 apellidos,
