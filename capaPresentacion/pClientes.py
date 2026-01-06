@@ -16,6 +16,8 @@ class PClientes:
             st.session_state.telefono = ""
         if "ruc" not in st.session_state:
             st.session_state.ruc = ""
+        if "tipo_cliente" not in st.session_state:
+            st.session_state.tipo_cliente = "Natural"
 
     def _solo_numeros(self, valor, max_len):
         return "".join(c for c in valor if c.isdigit())[:max_len]
@@ -46,6 +48,15 @@ class PClientes:
 
         st.subheader("📝 Registrar / Editar Cliente")
 
+        # -------- TIPO DE CLIENTE --------
+        tipo_cliente = st.selectbox(
+            "Tipo de Cliente",
+            ["Natural", "Jurídico"],
+            index=0 if not cliente else
+            (0 if cliente["tipo_cliente"] == "Natural" else 1)
+        )
+        st.session_state.tipo_cliente = tipo_cliente
+
         nombres = st.text_input(
             "Nombres",
             value=cliente["nombres"] if cliente else ""
@@ -56,23 +67,32 @@ class PClientes:
             value=cliente["apellidos"] if cliente else ""
         )
 
-        # ---------- DNI ----------
+        # -------- DNI --------
         dni_raw = st.text_input(
             "DNI (8 dígitos)",
             max_chars=8,
             value=cliente["dni"] if cliente else ""
         )
         st.session_state.dni = self._solo_numeros(dni_raw, 8)
-        st.caption(f"{len(st.session_state.dni)}/8")
+        st.caption(f"{len(st.session_state.dni)}/8 dígitos")
 
-        # ---------- TELÉFONO ----------
+        # -------- RUC --------
+        ruc_raw = st.text_input(
+            "RUC (11 dígitos)",
+            max_chars=11,
+            value=cliente["ruc"] if cliente else ""
+        )
+        st.session_state.ruc = self._solo_numeros(ruc_raw, 11)
+        st.caption(f"{len(st.session_state.ruc)}/11 dígitos")
+
+        # -------- TELÉFONO --------
         tel_raw = st.text_input(
             "Teléfono (9 dígitos)",
             max_chars=9,
             value=cliente["telefono"] if cliente else ""
         )
         st.session_state.telefono = self._solo_numeros(tel_raw, 9)
-        st.caption(f"{len(st.session_state.telefono)}/9")
+        st.caption(f"{len(st.session_state.telefono)}/9 dígitos")
 
         correo = st.text_input(
             "Correo electrónico",
@@ -88,16 +108,22 @@ class PClientes:
                     if cliente:
                         self.logica.actualizar(
                             cliente["id_cliente"],
+                            st.session_state.tipo_cliente,
                             nombres,
                             apellidos,
+                            st.session_state.dni,
+                            st.session_state.ruc,
                             st.session_state.telefono,
                             correo
                         )
                         st.success("Cliente actualizado correctamente")
                     else:
                         self.logica.registrar(
+                            st.session_state.tipo_cliente,
                             nombres,
                             apellidos,
+                            st.session_state.dni,
+                            st.session_state.ruc,
                             st.session_state.telefono,
                             correo
                         )
@@ -117,4 +143,6 @@ class PClientes:
         st.session_state.cliente_sel = None
         st.session_state.dni = ""
         st.session_state.telefono = ""
+        st.session_state.ruc = ""
+        st.session_state.tipo_cliente = "Natural"
         st.rerun()
