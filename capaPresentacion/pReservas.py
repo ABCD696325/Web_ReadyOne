@@ -35,14 +35,26 @@ class PReservas:
         self.formulario()
 
     def formulario(self):
-        clientes = {
-            f"{c['nombre']}": c["id_cliente"]
-            for c in self.clientes.listar()
-        }
+        clientes_db = self.clientes.listar()
+
+        # 🔥 CONSTRUCCIÓN SEGURA DEL SELECTBOX
+        clientes = {}
+        for c in clientes_db:
+            etiqueta = (
+                c.get("nombre")
+                or c.get("nombres")
+                or c.get("razon_social")
+                or c.get("cliente")
+                or f"Cliente {c['id_cliente']}"
+            )
+            clientes[etiqueta] = c["id_cliente"]
 
         st.subheader("📝 Registrar Reserva")
 
-        cliente = st.selectbox("Cliente", clientes.keys())
+        cliente = st.selectbox(
+            "Cliente",
+            clientes.keys()
+        )
 
         precio = st.number_input(
             "Precio (S/.)",
@@ -52,8 +64,7 @@ class PReservas:
 
         estado = st.selectbox(
             "Estado",
-            ["SOLICITADO", "EN_PROCESO", "FINALIZADO", "CANCELADO"],
-            help="Estado actual de la reserva"
+            ["SOLICITADO", "EN_PROCESO", "FINALIZADO", "CANCELADO"]
         )
 
         observaciones = st.text_area("Observaciones")
