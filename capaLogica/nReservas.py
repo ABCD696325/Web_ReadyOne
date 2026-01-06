@@ -17,7 +17,7 @@ class NReservas:
         ciudad_origen,
         ciudad_destino,
         numero_pasajeros,
-        observaciones=""
+        observaciones
     ):
         if fecha_servicio < date.today():
             raise ValueError("La fecha no puede ser pasada")
@@ -26,7 +26,7 @@ class NReservas:
             "id_cliente": id_cliente,
             "tipo_servicio": tipo_servicio,
             "fecha_servicio": fecha_servicio.isoformat(),
-            "hora_servicio": str(hora_servicio),
+            "hora_servicio": hora_servicio,
             "ciudad_origen": ciudad_origen,
             "ciudad_destino": ciudad_destino,
             "numero_pasajeros": int(numero_pasajeros),
