@@ -15,6 +15,7 @@ class PVehiculos:
         st.title("🚗 Gestión de Vehículos - READY ONE")
 
         vehiculos = self.logica.listar()
+        st.subheader("📋 Vehículos registrados")
 
         seleccion = st.dataframe(
             vehiculos,
@@ -34,36 +35,49 @@ class PVehiculos:
     def formulario(self):
         vehiculo = st.session_state.vehiculo_sel
 
+        st.subheader("📝 Registrar / Editar Vehículo")
+
         placa = st.text_input(
             "Placa",
             value=vehiculo["placa"] if vehiculo else "",
-            help="Mínimo 6 caracteres"
+            placeholder="Ej: ABC-123",
+            help="Campo obligatorio. Mínimo 6 caracteres."
         )
 
         modelo = st.text_input(
             "Modelo",
-            value=vehiculo["modelo"] if vehiculo else ""
+            value=vehiculo["modelo"] if vehiculo else "",
+            placeholder="Ej: Hiace, Sprinter, Van",
+            help="Campo obligatorio. Describe el tipo de vehículo."
         )
 
         capacidad = st.number_input(
             "Capacidad de pasajeros",
             min_value=4,
             step=1,
-            value=vehiculo["capacidad"] if vehiculo else 4
+            value=vehiculo["capacidad"] if vehiculo else 4,
+            help="Debe ser igual o mayor a 4 pasajeros."
         )
 
         estado = st.selectbox(
             "Estado del vehículo",
             ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"],
-            index=0 if not vehiculo else
-            ["DISPONIBLE", "MANTENIMIENTO", "FUERA_SERVICIO"]
-            .index(vehiculo["estado"])
+            help="Indica la disponibilidad actual del vehículo."
         )
 
         col1, col2 = st.columns(2)
 
         with col1:
             if st.button("💾 Guardar"):
+                # 👉 VALIDACIÓN DIRECTA ANTES DE GUARDAR
+                if not placa or len(placa) < 6:
+                    st.warning("⚠️ Ingrese una placa válida (mínimo 6 caracteres)")
+                    return
+
+                if not modelo:
+                    st.warning("⚠️ El modelo es obligatorio")
+                    return
+
                 try:
                     if vehiculo:
                         self.logica.actualizar(
@@ -73,7 +87,7 @@ class PVehiculos:
                             capacidad,
                             estado
                         )
-                        st.success("Vehículo actualizado correctamente")
+                        st.success("✅ Vehículo actualizado correctamente")
                     else:
                         self.logica.registrar(
                             placa,
@@ -81,7 +95,7 @@ class PVehiculos:
                             capacidad,
                             estado
                         )
-                        st.success("Vehículo registrado correctamente")
+                        st.success("✅ Vehículo registrado correctamente")
 
                     self._limpiar()
                 except Exception as e:
