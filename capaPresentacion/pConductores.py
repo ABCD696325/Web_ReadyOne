@@ -1,21 +1,32 @@
 import streamlit as st
 from capaLogica.nConductores import NConductores
 
+
 class PConductores:
     def __init__(self):
         self.logica = NConductores()
         self._init_state()
         self.interfaz()
 
+    # ================== ESTADO ==================
+
     def _init_state(self):
         if "conductor_sel" not in st.session_state:
             st.session_state.conductor_sel = None
+
+    # ================== UTIL ==================
+
+    def _solo_numeros(self, valor, limite):
+        if valor is None:
+            return ""
+        return "".join(c for c in str(valor) if c.isdigit())[:limite]
+
+    # ================== UI ==================
 
     def interfaz(self):
         st.title("👨‍✈️ Gestión de Conductores - READY ONE")
 
         conductores = self.logica.listar()
-        st.subheader("📋 Conductores registrados")
 
         seleccion = st.dataframe(
             conductores,
@@ -38,36 +49,42 @@ class PConductores:
 
         nombres = st.text_input(
             "Nombres",
-            value=conductor["nombres"] if conductor else ""
+            value=conductor.get("nombres", "") if conductor else ""
         )
+
         apellidos = st.text_input(
             "Apellidos",
-            value=conductor["apellidos"] if conductor else ""
+            value=conductor.get("apellidos", "") if conductor else ""
         )
+
         licencia = st.text_input(
             "Licencia de conducir",
-            value=conductor["licencia"] if conductor else ""
+            value=conductor.get("licencia", "") if conductor else "",
+            help="Ejemplo: A12345678, Q1234567"
         )
-        telefono = st.text_input(
-            "Teléfono",
-            max_chars=9,
-            value=conductor["telefono"] if conductor else ""
+
+        telefono_input = st.text_input(
+            "Teléfono (9 dígitos)",
+            value=conductor.get("telefono", "") if conductor else ""
         )
+        telefono = self._solo_numeros(telefono_input, 9)
+        st.caption(f"{len(telefono)}/9")
 
         tiene_papeletas = st.selectbox(
             "¿Tiene papeletas?",
             ["NO", "SÍ"],
-            index=1 if conductor and conductor["tiene_papeletas"] else 0
+            index=1 if conductor and conductor.get("tiene_papeletas") else 0
         )
 
         estado = st.selectbox(
             "Estado del conductor",
             ["ACTIVO", "INACTIVO"],
-            index=0 if not conductor or conductor["estado"] == "ACTIVO" else 1
+            index=0 if not conductor or conductor.get("estado") == "ACTIVO" else 1
         )
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
+        # ================== GUARDAR ==================
         with col1:
             if st.button("💾 Guardar"):
                 try:
@@ -83,15 +100,14 @@ class PConductores:
                 except Exception as e:
                     st.error(str(e))
 
+        # ================== ELIMINAR ==================
         with col2:
             if st.button("🗑️ Eliminar") and conductor:
                 self.logica.eliminar(conductor["id_conductor"])
                 st.warning("Conductor eliminado")
                 self._limpiar()
 
-        with col3:
-            if st.button("🧹 Limpiar"):
-                self._limpiar()
+    # ================== LOGICA ==================
 
     def _guardar(
         self,
@@ -128,6 +144,8 @@ class PConductores:
             st.success("Conductor registrado correctamente")
 
         self._limpiar()
+
+    # ================== LIMPIAR ==================
 
     def _limpiar(self):
         st.session_state.conductor_sel = None
