@@ -1,29 +1,51 @@
-from conexion import ConexionDB
+from capaDatos.dConductores import DConductores
 
-class DConductores:
+class NConductores:
     def __init__(self):
-        self.db = ConexionDB().conectar()
-        self.tabla = "conductores"
+        self.datos = DConductores()
 
     def listar(self):
-        response = self.db.table(self.tabla).select("*").execute()
-        return response.data
+        return self.datos.listar()
 
-    def insertar(self, data):
-        return self.db.table(self.tabla).insert(data).execute()
+    def registrar(
+        self,
+        nombres,
+        apellidos,
+        telefono,
+        tiene_papeletas=False,
+        estado="ACTIVO"
+    ):
+        if not estado:
+            estado = "ACTIVO"
 
-    def actualizar(self, id_conductor, data):
-        return (
-            self.db.table(self.tabla)
-            .update(data)
-            .eq("id_conductor", id_conductor)
-            .execute()
-        )
+        data = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "telefono": telefono,
+            "tiene_papeletas": tiene_papeletas,
+            "estado": estado
+        }
+
+        return self.datos.insertar(data)
+
+    def actualizar(
+        self,
+        id_conductor,
+        nombres,
+        apellidos,
+        telefono,
+        tiene_papeletas,
+        estado
+    ):
+        data = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "telefono": telefono,
+            "tiene_papeletas": tiene_papeletas,
+            "estado": estado
+        }
+
+        return self.datos.actualizar(id_conductor, data)
 
     def eliminar(self, id_conductor):
-        return (
-            self.db.table(self.tabla)
-            .delete()
-            .eq("id_conductor", id_conductor)
-            .execute()
-        )
+        return self.datos.eliminar(id_conductor)
